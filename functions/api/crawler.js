@@ -1,76 +1,55 @@
-import { crawlAndGenerateReport } from '../../shared/crawler.js';
+export async function onRequest(context) {
+  const { request } = context;
 
-export async function onRequest({ request }) {
-  const corsHeaders = {
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "Access-Control-Allow-Headers": "*",
-    "Content-Type": "text/plain",
-  };
-
-  // Handle preflight request
   if (request.method === "OPTIONS") {
     return new Response(null, {
       status: 204,
-      headers: corsHeaders,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "POST, OPTIONS",
+        "Access-Control-Allow-Headers": "*",
+      },
     });
   }
 
-  // Auth
-  const auth = request.headers.get("Authorization");
-  if (auth !== "Bearer Y0u_W1$h!") {
-    return new Response("Unauthorized", {
-      status: 403,
-      headers: corsHeaders,
-    });
-  }
-
-  let json;
-  try {
-    json = await request.json();
-  } catch (err) {
-    return new Response("Invalid JSON", {
-      status: 400,
-      headers: corsHeaders,
-    });
-  }
-
-  const {
-    baseDomain,
-    findWord = "",
-    findBrokenLinks = false,
-    maxPages = 10,
-    requiredPrecursor = "",
-    phraseToCheck = "",
-    ignoreWords = [],
-  } = json;
+  const json = await request.json();
+  const baseDomain = json.baseDomain;
 
   if (!baseDomain) {
     return new Response("Missing baseDomain", {
       status: 400,
-      headers: corsHeaders,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Content-Type": "text/plain",
+      },
     });
   }
 
   try {
     const report = await crawlAndGenerateReport({
       baseDomain,
-      findWord,
-      findBrokenLinks,
-      maxPages,
-      requiredPrecursor,
-      phraseToCheck,
-      ignoreWords,
+      findWord: json.findWord || "",
+      findBrokenLinks: json.findBrokenLinks || false,
+      maxPages: parseInt(json.maxPages || "10"),
+      requiredPrecursor: json.requiredPrecursor || "",
+      phraseToCheck: json.phraseToCheck || "",
+      ignoreWords: Array.isArray(json.ignoreWords) ? json.ignoreWords : [],
     });
 
     return new Response(report, {
       status: 200,
-      headers: corsHeaders,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Content-Type": "text/plain",
+      },
     });
   } catch (err) {
     return new Response("Crawler error: " + err.message, {
       status: 500,
-      headers: corsHeaders,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Content-Type": "text/plain",
+      },
     });
   }
 }
