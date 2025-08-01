@@ -10,16 +10,20 @@ let visited, toVisit, totalPages, processedPages, allIssues, groupedIssues, base
 
 const octanePassword = "takealook";
 
-router.get("/", async (req, res) => {
-  baseDomain = req.query.baseDomain;
-  findWord = req.query.findWord || "";
-  findBrokenLinks = req.query.findBrokenLinks === "true";
-  maxPages = parseInt(req.query.maxPages || "10");
-  precursorRequired = req.query.requiredPrecursor || "";
-  phraseToCheck = req.query.phraseToCheck || "";
-  ignoreWords = (req.query.ignoreWords || "").split(",").map(w => w.trim()).filter(Boolean);
+router.post("/", async (req, res) => {
+  const {
+    baseDomain,
+    findWord = "",
+    findBrokenLinks = false,
+    maxPages = 10,
+    requiredPrecursor = "",
+    phraseToCheck = "",
+    ignoreWords = []
+  } = req.body;
 
-  if (!baseDomain) return res.status(400).send("Missing required 'baseDomain' parameter.");
+  if (!baseDomain) {
+    return res.status(400).send("Missing required 'baseDomain' parameter.");
+  }
 
   visited = new Set();
   toVisit = new Set([baseDomain]);
@@ -36,6 +40,7 @@ router.get("/", async (req, res) => {
   res.setHeader("Content-Type", "text/plain");
   res.send(result);
 });
+
 
 module.exports = router;
 

@@ -20,7 +20,7 @@ const grammarCrawler = require('./routes/grammar_crawler');
 app.use(`${API_BASE}/crawler`, grammarCrawler);
 
 // Root route
-app.get('/', (req, res) => {
+app.post('/', (req, res) => {
   res.send({ status: 'API is running locally' });
 });
 
