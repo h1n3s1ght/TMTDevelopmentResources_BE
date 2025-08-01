@@ -1,30 +1,38 @@
 import { crawlAndGenerateReport } from '../../shared/crawler.js';
 
 export async function onRequest({ request }) {
-  // Preflight CORS
+  const corsHeaders = {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Access-Control-Allow-Headers": "*",
+    "Content-Type": "text/plain",
+  };
+
+  // Handle preflight request
   if (request.method === "OPTIONS") {
     return new Response(null, {
       status: 204,
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "POST, OPTIONS",
-        "Access-Control-Allow-Headers": "*",
-      },
+      headers: corsHeaders,
     });
   }
 
   // Auth
   const auth = request.headers.get("Authorization");
   if (auth !== "Bearer Y0u_W1$h!") {
-    return new Response("Unauthorized", { status: 403 });
+    return new Response("Unauthorized", {
+      status: 403,
+      headers: corsHeaders,
+    });
   }
 
-  // Parse JSON payload
-  let body;
+  let json;
   try {
-    body = await request.json();
+    json = await request.json();
   } catch (err) {
-    return new Response("Invalid JSON body", { status: 400 });
+    return new Response("Invalid JSON", {
+      status: 400,
+      headers: corsHeaders,
+    });
   }
 
   const {
@@ -35,10 +43,13 @@ export async function onRequest({ request }) {
     requiredPrecursor = "",
     phraseToCheck = "",
     ignoreWords = [],
-  } = body;
+  } = json;
 
   if (!baseDomain) {
-    return new Response("Missing required 'baseDomain' parameter.", { status: 400 });
+    return new Response("Missing baseDomain", {
+      status: 400,
+      headers: corsHeaders,
+    });
   }
 
   try {
@@ -54,18 +65,12 @@ export async function onRequest({ request }) {
 
     return new Response(report, {
       status: 200,
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Content-Type": "text/plain",
-      },
+      headers: corsHeaders,
     });
   } catch (err) {
     return new Response("Crawler error: " + err.message, {
       status: 500,
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Content-Type": "text/plain",
-      },
+      headers: corsHeaders,
     });
   }
 }
