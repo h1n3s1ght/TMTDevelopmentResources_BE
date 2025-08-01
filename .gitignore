@@ -1,0 +1,29 @@
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# dotenv files
+.env
+.env.*.local
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# Cloudflare output (if using wrangler dev or builds)
+dist/
+.cache/
+wrangler.toml.local
+
+# VSCode / IDE
+.vscode/
+.idea/
+
+# Logs
+logs/
+*.log
+
+# Others (optional)
+functions/node_modules/
