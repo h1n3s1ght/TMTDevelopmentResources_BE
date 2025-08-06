@@ -3,7 +3,6 @@ const express = require("express");
 const router = express.Router();
 const { crawlAndGenerateReport, getCrawlProgress } = require("../shared/grammarScanner");
 
-
 router.post("/", async (req, res) => {
   const {
     baseDomain,
@@ -18,7 +17,7 @@ router.post("/", async (req, res) => {
   if (!baseDomain) return res.status(400).send("Missing baseDomain");
 
   try {
-    const report = await crawlAndGenerateReport({
+    const { crawlId, report } = await crawlAndGenerateReport({
       baseDomain,
       findWord,
       findBrokenLinks,
@@ -29,15 +28,16 @@ router.post("/", async (req, res) => {
     });
 
     res.setHeader("Content-Type", "text/plain");
-    res.send(report);
+    res.send(JSON.stringify({ crawlId, report }));
   } catch (err) {
     console.error("❌ Error during scan:", err.message);
     res.status(500).send("Server error during crawl");
   }
 });
 
-router.get("/progress", (req, res) => {
-  const progress = getCrawlProgress();
+router.get("/progress/:crawlId", (req, res) => {
+  const crawlId = req.params.crawlId;
+  const progress = getCrawlProgress(crawlId);
   res.json(progress);
 });
 
